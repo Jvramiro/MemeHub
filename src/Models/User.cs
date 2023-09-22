@@ -4,7 +4,7 @@
         public string Username { get; set; }
         public string Password { get; set; }
         public string Email { get; set; }
-        public Role Role { get; private set; }
+        public Role Role { get; set; }
 
         public User(string Username, string Password, string Email, Role role, Guid? CreatedBy = null) {
             this.Username = Username;
