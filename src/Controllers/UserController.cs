@@ -20,7 +20,7 @@ namespace MemeHub.Controllers
         public async Task<IActionResult> Get(int page = 1, int rows = 10) {
 
             if(rows > 30){
-                return BadRequest("The number of rows cannot exceed 10");
+                return BadRequest("The number of rows cannot exceed 30");
             }
             var users = await dbContext.Users.AsNoTracking().Skip((page - 1) * rows).ToListAsync();
 
@@ -48,11 +48,11 @@ namespace MemeHub.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] UserRequest request) {
 
-            if (ModelState.IsValid) {
+            if (!ModelState.IsValid){
                 return BadRequest();
             }
 
-            var user = new User(request.Username, request.Password.HashPassword(), request.Email, request.Role);
+            var user = new User(request.Username, request.Password.HashPassword(), request.Email, request.Role, Guid.Empty);
 
             await dbContext.Users.AddAsync(user);
             await dbContext.SaveChangesAsync();
@@ -64,7 +64,7 @@ namespace MemeHub.Controllers
         [HttpPut("{Id}")]
         public async Task<IActionResult> Update([FromRoute] Guid Id, UserUpdate request) {
 
-            if (ModelState.IsValid) {
+            if (!ModelState.IsValid) {
                 return BadRequest();
             }
 
