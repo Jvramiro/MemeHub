@@ -2,6 +2,7 @@
 using MemeHub.DTO;
 using MemeHub.Extensions;
 using MemeHub.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -45,6 +46,7 @@ namespace MemeHub.Controllers {
         }
 
         [HttpPost]
+        [Authorize(Roles = "User, Adm")]
         public async Task<IActionResult> Create([FromBody] CommentRequest request) {
 
             if (!ModelState.IsValid) {
@@ -64,6 +66,7 @@ namespace MemeHub.Controllers {
         }
 
         [HttpPut("{Id}")]
+        [Authorize(Roles = "User, Adm")]
         public async Task<IActionResult> Update([FromRoute] Guid Id, [FromBody] string Text) {
 
             if (!ModelState.IsValid) {
@@ -85,6 +88,7 @@ namespace MemeHub.Controllers {
         }
 
         [HttpDelete("{Id}")]
+        [Authorize(Roles = "User, Adm")]
         public async Task<IActionResult> Delete([FromRoute] Guid Id) {
 
             var comment = await dbContext.Comments.AsNoTracking().FirstOrDefaultAsync(c => c.Id == Id);

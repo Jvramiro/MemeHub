@@ -2,6 +2,7 @@
 using MemeHub.DTO;
 using MemeHub.Extensions;
 using MemeHub.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -40,7 +41,7 @@ namespace MemeHub.Controllers {
             return Ok(response);
         }
 
-        [HttpGet("top")]
+        [HttpGet("ranked")]
         public async Task<IActionResult> GetByRankingTrue(int page = 1, int rows = 10, int limit = 200) {
 
             if(limit > 200) {
@@ -72,6 +73,7 @@ namespace MemeHub.Controllers {
         }
 
         [HttpPost]
+        [Authorize(Roles = "User, Adm")]
         public async Task<IActionResult> Create([FromBody] PostRequest request) {
 
             if (!ModelState.IsValid) {
@@ -88,6 +90,7 @@ namespace MemeHub.Controllers {
         }
 
         [HttpDelete("{Id}")]
+        [Authorize(Roles = "User, Adm")]
         public async Task<IActionResult> Delete([FromRoute] Guid Id) {
 
             var post = await dbContext.Posts.AsNoTracking().FirstOrDefaultAsync(p => p.Id == Id);
