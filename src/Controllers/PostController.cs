@@ -40,19 +40,34 @@ namespace MemeHub.Controllers {
             return Ok(response);
         }
 
-        [HttpGet("{Id}")]
-        public async Task<IActionResult> GetById([FromRoute] Guid Id) {
+        [HttpGet("top")]
+        public async Task<IActionResult> GetByRankingTrue(int page = 1, int rows = 10, int limit = 200) {
 
-            var post = await dbContext.Posts.AsNoTracking().FirstOrDefaultAsync(p => p.Id == Id);
-
-            if (post == null) {
-                return NotFound("Post not found");
+            if(limit > 200) {
+                return BadRequest("The limit of post to check cannot exceed 200");
+            }
+            if (rows > 30) {
+                return BadRequest("The number of rows cannot exceed 30");
             }
 
-            int ratingTrue = await dbContext.Rating.Where(r => r.PostId == post.Id && r.Value && r.IsActive).CountAsync();
-            int ratingFalse = await dbContext.Rating.Where(r => r.PostId == post.Id && !r.Value && r.IsActive).CountAsync();
+            var allPosts = await dbContext.Posts.AsNoTracking().OrderByDescending(
+                p => dbContext.Rating.Count(r => r.PostId == p.Id && r.Value && r.IsActive))
+                .Take(limit).ToListAsync();
 
-            var response = new PostResponse(post.Title, post.ImageUrl, ratingTrue, ratingFalse);
+            var posts = allPosts.Skip((page - 1) * rows);
+
+            if (posts == null) {
+                return NotFound("No posts found");
+            }
+
+            var response = new List<PostResponse>();
+            foreach (var post in posts) {
+                int ratingTrue = await dbContext.Rating.Where(r => r.PostId == post.Id && r.Value && r.IsActive).CountAsync();
+                int ratingFalse = await dbContext.Rating.Where(r => r.PostId == post.Id && !r.Value && r.IsActive).CountAsync();
+
+                response.Add(new PostResponse(post.Title, post.ImageUrl, ratingTrue, ratingFalse));
+            }
+
             return Ok(response);
         }
 
