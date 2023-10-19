@@ -78,6 +78,14 @@ namespace MemeHub.Controllers
                 return NotFound("User not found");
             }
 
+            var userId = HttpContext.User.FindFirst("Id").Value;
+            if (userId == null) {
+                return BadRequest("There's no valid Id on Token");
+            }
+            if (user.Id.ToString() != userId && !HttpContext.User.IsInRole("Adm")) {
+                return Forbid("User not authorized to make changes in this slot");
+            }
+
             user.Username = request.Username ?? user.Username;
             user.Email = request.Email ?? user.Email;
             user.Password = request.Password != null ? request.Password.HashPassword() : user.Username;
@@ -100,6 +108,14 @@ namespace MemeHub.Controllers
 
             if (user == null) {
                 return NotFound("User not found");
+            }
+
+            var userId = HttpContext.User.FindFirst("Id").Value;
+            if (userId == null) {
+                return BadRequest("There's no valid Id on Token");
+            }
+            if (user.Id.ToString() != userId && !HttpContext.User.IsInRole("Adm")) {
+                return Forbid("User not authorized to make changes in this slot");
             }
 
             dbContext.Users.Remove(user);

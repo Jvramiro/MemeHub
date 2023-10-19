@@ -1,5 +1,6 @@
 ﻿using MemeHub.Data;
 using MemeHub.DTO;
+using MemeHub.Extensions;
 using MemeHub.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

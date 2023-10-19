@@ -5,6 +5,7 @@ using MemeHub.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using System.Linq;
 
 namespace MemeHub.Controllers {
@@ -63,6 +64,14 @@ namespace MemeHub.Controllers {
                 return NotFound("Rating not found");
             }
 
+            var userId = HttpContext.User.FindFirst("Id").Value;
+            if (userId == null) {
+                return BadRequest("There's no valid Id on Token");
+            }
+            if (rating.Owner.ToString() != userId && !HttpContext.User.IsInRole("Adm")) {
+                return Forbid("User not authorized to make changes in this slot");
+            }
+
             rating.IsActive = request.IsActive;
             rating.Value = !request.IsActive ? false : request.Value;
 
@@ -80,6 +89,14 @@ namespace MemeHub.Controllers {
 
             if (rating == null) {
                 return NotFound("Post not found");
+            }
+
+            var userId = HttpContext.User.FindFirst("Id").Value;
+            if (userId == null) {
+                return BadRequest("There's no valid Id on Token");
+            }
+            if (rating.Owner.ToString() != userId && !HttpContext.User.IsInRole("Adm")) {
+                return Forbid("User not authorized to make changes in this slot");
             }
 
             dbContext.Rating.Remove(rating);

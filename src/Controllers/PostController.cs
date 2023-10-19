@@ -99,6 +99,14 @@ namespace MemeHub.Controllers {
                 return NotFound("Post not found");
             }
 
+            var userId = HttpContext.User.FindFirst("Id").Value;
+            if(userId == null) {
+                return BadRequest("There's no valid Id on Token");
+            }
+            if (post.Owner.ToString() != userId && !HttpContext.User.IsInRole("Adm")) {
+                return Forbid("User not authorized to make changes in this slot");
+            }
+
             dbContext.Posts.Remove(post);
             await dbContext.SaveChangesAsync();
 

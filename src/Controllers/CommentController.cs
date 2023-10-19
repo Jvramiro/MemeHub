@@ -5,6 +5,7 @@ using MemeHub.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using System.Linq;
 
 namespace MemeHub.Controllers {
@@ -53,7 +54,12 @@ namespace MemeHub.Controllers {
                 return BadRequest();
             }
 
-            var comment = new Comment(request.Text, request.PostId, Guid.Empty);
+            Guid userId;
+            if(!Guid.TryParse(HttpContext.User.FindFirst("Id").Value, out userId)){
+                return BadRequest("There's no valid Id on Token");
+            }
+
+            var comment = new Comment(request.Text, userId, request.PostId, Guid.Empty);
 
             if(request.TaggedId != null) {
                 comment.TaggedId = (Guid)request.TaggedId;
@@ -79,6 +85,14 @@ namespace MemeHub.Controllers {
                 return NotFound("Comment not found");
             }
 
+            var userId = HttpContext.User.FindFirst("Id").Value;
+            if (userId == null) {
+                return BadRequest("There's no valid Id on Token");
+            }
+            if (comment.Owner.ToString() != userId && !HttpContext.User.IsInRole("Adm")) {
+                return Forbid("User not authorized to make changes in this slot");
+            }
+
             comment.Text = Text;
 
             dbContext.Comments.Update(comment);
@@ -95,6 +109,14 @@ namespace MemeHub.Controllers {
 
             if (comment == null) {
                 return NotFound("Comment not found");
+            }
+
+            var userId = HttpContext.User.FindFirst("Id").Value;
+            if (userId == null) {
+                return BadRequest("There's no valid Id on Token");
+            }
+            if (comment.Owner.ToString() != userId && !HttpContext.User.IsInRole("Adm")) {
+                return Forbid("User not authorized to make changes in this slot");
             }
 
             dbContext.Comments.Remove(comment);
