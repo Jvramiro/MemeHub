@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace MemeHub.Controllers {
-    [Route("/Login")]
+    [Route("api/login")]
     [ApiController]
     public class TokenController : ControllerBase {
 

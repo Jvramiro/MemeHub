@@ -65,7 +65,7 @@ namespace MemeHub.Controllers
         }
 
         [HttpPut("{Id}")]
-        [Authorize(Roles = "User, Adm")]
+        /*[Authorize(Roles = "User, Adm")]*/
         public async Task<IActionResult> Update([FromRoute] Guid Id, UserUpdate request) {
 
             if (!ModelState.IsValid) {

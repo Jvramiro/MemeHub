@@ -46,10 +46,15 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseCors(options => options.WithOrigins("http://localhost:5123", "https://localhost:7099", "http://localhost:8080")
+                       .AllowAnyMethod()
+                       .AllowAnyHeader()
+                       .AllowCredentials());
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
