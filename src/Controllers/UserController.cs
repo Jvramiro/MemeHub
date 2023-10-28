@@ -48,14 +48,27 @@ namespace MemeHub.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "User, Adm")]
+        [AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] UserRequest request) {
 
             if (!ModelState.IsValid){
                 return BadRequest();
             }
 
-            var user = new User(request.Username, request.Password.HashPassword(), request.Email, request.Role, Guid.Empty);
+            if (request.Role == Role.Adm) {
+                if (HttpContext != null && HttpContext.User != null) {
+                    var userId = HttpContext.User.FindFirst("Id")?.Value;
+                    if (userId == null || !HttpContext.User.IsInRole("Adm")) {
+                        return Unauthorized("User not authorized to create an Adm User");
+                    }
+                }
+                else {
+                    return Unauthorized("User not authorized to create an Adm User");
+                }
+            }
+
+            var user = new User(request.Username, request.Password.HashPassword(),
+                                request.Email, request.Role, request.Birthday);
 
             await dbContext.Users.AddAsync(user);
             await dbContext.SaveChangesAsync();
@@ -65,7 +78,7 @@ namespace MemeHub.Controllers
         }
 
         [HttpPut("{Id}")]
-        /*[Authorize(Roles = "User, Adm")]*/
+        [Authorize(Roles = "User, Adm")]
         public async Task<IActionResult> Update([FromRoute] Guid Id, UserUpdate request) {
 
             if (!ModelState.IsValid) {
@@ -83,7 +96,7 @@ namespace MemeHub.Controllers
                 return BadRequest("There's no valid Id on Token");
             }
             if (user.Id.ToString() != userId && !HttpContext.User.IsInRole("Adm")) {
-                return Forbid("User not authorized to make changes in this slot");
+                return Unauthorized("User not authorized to make changes in this slot");
             }
 
             user.Username = request.Username ?? user.Username;
@@ -115,7 +128,7 @@ namespace MemeHub.Controllers
                 return BadRequest("There's no valid Id on Token");
             }
             if (user.Id.ToString() != userId && !HttpContext.User.IsInRole("Adm")) {
-                return Forbid("User not authorized to make changes in this slot");
+                return Unauthorized("User not authorized to make changes in this slot");
             }
 
             dbContext.Users.Remove(user);

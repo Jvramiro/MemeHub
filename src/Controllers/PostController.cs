@@ -80,7 +80,12 @@ namespace MemeHub.Controllers {
                 return BadRequest();
             }
 
-            var post = new Post(Guid.Empty, request.title, request.ImageUrl);
+            Guid userId = Guid.Empty;
+            if (!Guid.TryParse(HttpContext.User.FindFirst("Id").Value, out userId)) {
+                return BadRequest("There's no valid Id on Token");
+            }
+
+            var post = new Post(userId, request.title, request.ImageUrl);
 
             await dbContext.Posts.AddAsync(post);
             await dbContext.SaveChangesAsync();
@@ -104,7 +109,7 @@ namespace MemeHub.Controllers {
                 return BadRequest("There's no valid Id on Token");
             }
             if (post.Owner.ToString() != userId && !HttpContext.User.IsInRole("Adm")) {
-                return Forbid("User not authorized to make changes in this slot");
+                return Unauthorized("User not authorized to make changes in this slot");
             }
 
             dbContext.Posts.Remove(post);

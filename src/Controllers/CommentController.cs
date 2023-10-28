@@ -90,7 +90,7 @@ namespace MemeHub.Controllers {
                 return BadRequest("There's no valid Id on Token");
             }
             if (comment.Owner.ToString() != userId && !HttpContext.User.IsInRole("Adm")) {
-                return Forbid("User not authorized to make changes in this slot");
+                return Unauthorized("User not authorized to make changes in this slot");
             }
 
             comment.Text = Text;
@@ -116,7 +116,7 @@ namespace MemeHub.Controllers {
                 return BadRequest("There's no valid Id on Token");
             }
             if (comment.Owner.ToString() != userId && !HttpContext.User.IsInRole("Adm")) {
-                return Forbid("User not authorized to make changes in this slot");
+                return Unauthorized("User not authorized to make changes in this slot");
             }
 
             dbContext.Comments.Remove(comment);

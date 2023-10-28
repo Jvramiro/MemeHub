@@ -5,19 +5,18 @@
         public string Password { get; set; }
         public string Email { get; set; }
         public Role Role { get; set; }
+        public DateTime Birthday { get; set; }
 
-        public User(string Username, string Password, string Email, Role role, Guid CreatedBy) {
+        public User(string Username, string Password, string Email, Role Role, DateTime Birthday) {
             this.Username = Username;
             this.Password = Password;
             this.Email = Email;
-            this.Role = role;
+            this.Role = Role;
+            this.Birthday = Birthday;
             this.IsActive = true;
 
             CreatedOn = DateTime.UtcNow;
             UpdatedOn = DateTime.UtcNow;
-
-            this.CreatedBy = (Guid)CreatedBy;
-            this.UpdatedBy = (Guid)CreatedBy;
 
         }
 
