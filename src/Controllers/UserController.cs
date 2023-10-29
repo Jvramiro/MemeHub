@@ -35,6 +35,7 @@ namespace MemeHub.Controllers
         }
 
         [HttpGet("{Id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById([FromRoute] Guid Id) {
 
             var user = await dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == Id);

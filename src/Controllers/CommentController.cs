@@ -19,6 +19,7 @@ namespace MemeHub.Controllers {
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Get(int page = 1, int rows = 10) {
 
             if (rows > 30) {
@@ -35,6 +36,7 @@ namespace MemeHub.Controllers {
         }
 
         [HttpGet("{Id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById([FromRoute] Guid Id) {
 
             var comment = await dbContext.Comments.AsNoTracking().FirstOrDefaultAsync(c => c.Id == Id);

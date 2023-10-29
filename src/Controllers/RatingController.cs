@@ -19,6 +19,7 @@ namespace MemeHub.Controllers {
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Get(int page = 1, int rows = 10) {
 
             if (rows > 50) {

@@ -1,3 +1,6 @@
 ﻿namespace MemeHub.DTO {
-    public record PostResponse(string title, string ImageUrl, int ratingLike, int ratingDislike);
+    public record PostResponse(
+        Guid id, string title, string imageUrl, string ownerUsername, int ratingLike, int ratingDislike,
+        int commentCount, Guid createdBy, DateTime createdOn
+    );
 }

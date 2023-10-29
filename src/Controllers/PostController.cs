@@ -18,6 +18,7 @@ namespace MemeHub.Controllers {
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Get(int page = 1, int rows = 10) {
 
             if (rows > 30) {
@@ -34,14 +35,18 @@ namespace MemeHub.Controllers {
             foreach(var post in posts) {
                 int ratingTrue = await dbContext.Rating.Where(r => r.PostId == post.Id && r.Value && r.IsActive).CountAsync();
                 int ratingFalse = await dbContext.Rating.Where(r => r.PostId == post.Id && !r.Value && r.IsActive).CountAsync();
+                int commentCount = await dbContext.Comments.CountAsync(c => c.PostId == post.Id);
 
-                response.Add(new PostResponse(post.Title, post.ImageUrl, ratingTrue, ratingFalse));
+                response.Add(new PostResponse(post.Id, post.Title, post.ImageUrl, post.OwnerUsername, ratingTrue, ratingFalse,
+                                                commentCount, post.Owner, post.CreatedOn));
+                Console.WriteLine($"User: {post.OwnerUsername}");
             }
 
             return Ok(response);
         }
 
         [HttpGet("ranked")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetByRankingTrue(int page = 1, int rows = 10, int limit = 200) {
 
             if(limit > 200) {
@@ -62,11 +67,14 @@ namespace MemeHub.Controllers {
             }
 
             var response = new List<PostResponse>();
+
             foreach (var post in posts) {
                 int ratingTrue = await dbContext.Rating.Where(r => r.PostId == post.Id && r.Value && r.IsActive).CountAsync();
                 int ratingFalse = await dbContext.Rating.Where(r => r.PostId == post.Id && !r.Value && r.IsActive).CountAsync();
+                int commentCount = await dbContext.Comments.CountAsync(c => c.PostId == post.Id);
 
-                response.Add(new PostResponse(post.Title, post.ImageUrl, ratingTrue, ratingFalse));
+                response.Add(new PostResponse(post.Id, post.Title, post.ImageUrl, post.OwnerUsername, ratingTrue, ratingFalse,
+                                                commentCount, post.Owner, post.CreatedOn));
             }
 
             return Ok(response);
@@ -85,12 +93,18 @@ namespace MemeHub.Controllers {
                 return BadRequest("There's no valid Id on Token");
             }
 
-            var post = new Post(userId, request.title, request.ImageUrl);
+            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if(user == null) {
+                return StatusCode(500, "There's no valid Id on Token");
+            }
+
+            var post = new Post(userId, request.title, request.ImageUrl, user.Username);
 
             await dbContext.Posts.AddAsync(post);
             await dbContext.SaveChangesAsync();
 
-            var response = new PostResponse(post.Title, post.ImageUrl, 0, 0);
+            var response = new PostResponse(post.Id, post.Title, post.ImageUrl, post.OwnerUsername, 0, 0, 0,
+                                            post.Owner, post.CreatedOn);
             return Created($"Post successfully created", post.Id);
         }
 
