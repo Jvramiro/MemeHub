@@ -45,6 +45,26 @@ namespace MemeHub.Controllers {
             return Ok(response);
         }
 
+        [HttpGet("{Id}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetById([FromRoute] Guid Id) {
+
+            var post = await dbContext.Posts.AsNoTracking().FirstOrDefaultAsync(c => c.Id == Id);
+
+            if (post == null) {
+                return NotFound("Post not found");
+            }
+
+            int ratingTrue = await dbContext.Rating.Where(r => r.PostId == post.Id && r.Value && r.IsActive).CountAsync();
+            int ratingFalse = await dbContext.Rating.Where(r => r.PostId == post.Id && !r.Value && r.IsActive).CountAsync();
+            int commentCount = await dbContext.Comments.CountAsync(c => c.PostId == post.Id);
+
+            var response = new PostResponse(post.Id, post.Title, post.ImageUrl, post.OwnerUsername, ratingTrue, ratingFalse,
+                                                commentCount, post.Owner, post.CreatedOn);
+
+            return Ok(response);
+        }
+
         [HttpGet("ranked")]
         [AllowAnonymous]
         public async Task<IActionResult> GetByRankingTrue(int page = 1, int rows = 10, int limit = 200) {
