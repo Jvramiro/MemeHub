@@ -22,8 +22,6 @@ namespace MemeHub.Controllers {
         [AllowAnonymous]
         public async Task<IActionResult> Login(LoginRequest request) {
 
-            return Ok(Request);
-
             var user = await dbContext.Users.AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Email == request.Email && u.Password == request.Password.HashPassword());
 
