@@ -1,5 +1,5 @@
 ﻿using MemeHub.Models;
 
 namespace MemeHub.DTO {
-    public record UserRequest(string Username, string Email, string Password, Role Role, DateTime Birthday);
+    public record UserRequest(string Username, string Email, string Password, DateTime Birthday, Role Role = 0);
 }

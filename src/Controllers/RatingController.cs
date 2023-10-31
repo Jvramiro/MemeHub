@@ -35,6 +35,20 @@ namespace MemeHub.Controllers {
             return Ok(rating);
         }
 
+        [HttpGet("{Id}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetById([FromRoute] Guid Id) {
+
+            var rating = await dbContext.Rating.AsNoTracking().FirstOrDefaultAsync(r => r.Id == Id);
+
+            if (rating == null) {
+                return NotFound("Rating not found");
+            }
+
+            return Ok(rating.Value);
+
+        }
+
         [HttpPost]
         [Authorize(Roles = "User, Adm")]
         public async Task<IActionResult> Create([FromBody] RatingRequest request) {
