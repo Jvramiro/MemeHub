@@ -46,7 +46,8 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-app.UseCors(options => options.WithOrigins("http://localhost:5123", "https://localhost:7099", "http://localhost:8080")
+app.UseCors(options => options.WithOrigins("http://localhost:5123", "https://localhost:7099",
+                                            "http://localhost:8080", "http://localhost:3000")
                        .AllowAnyMethod()
                        .AllowAnyHeader()
                        .AllowCredentials());
