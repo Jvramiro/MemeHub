@@ -30,7 +30,7 @@ namespace MemeHub.Controllers
                 return NotFound("No users found");
             }
 
-            var response = users.Select(u => new UserResponse(u.Username, u.Email, u.Role));
+            var response = users.Select(u => new UserResponse(u.Id, u.Username, u.Email, u.Role));
             return Ok(response);
         }
 
@@ -44,7 +44,7 @@ namespace MemeHub.Controllers
                 return NotFound("User not found");
             }
 
-            var response = new UserResponse(user.Username, user.Email, user.Role);
+            var response = new UserResponse(user.Id, user.Username, user.Email, user.Role);
             return Ok(response);
         }
 
@@ -74,7 +74,7 @@ namespace MemeHub.Controllers
             await dbContext.Users.AddAsync(user);
             await dbContext.SaveChangesAsync();
 
-            var response = new UserResponse(user.Username, user.Email, user.Role);
+            var response = new UserResponse(user.Id, user.Username, user.Email, user.Role);
             return Created($"User {user.Username} successfully created", user.Id);
         }
 
@@ -110,7 +110,7 @@ namespace MemeHub.Controllers
             dbContext.Users.Update(user);
             await dbContext.SaveChangesAsync();
 
-            var response = new UserResponse(user.Username, user.Email, user.Role);
+            var response = new UserResponse(user.Id, user.Username, user.Email, user.Role);
             return Ok(response);
         }
 
