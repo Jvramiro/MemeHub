@@ -43,14 +43,13 @@ builder.Services.AddAuthorization(options => {
 builder.Services.AddDbContext<DBContext>(options => options.UseSqlite(builder.Configuration["SQLiteDatabase:Path"]));
 
 builder.Services.AddControllers();
+builder.Services.AddCors(p => p.AddPolicy("corsapp", builder => {
+    builder.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+}));
 
 var app = builder.Build();
 
-app.UseCors(options => options.WithOrigins("http://localhost:5123", "https://localhost:7099",
-                                            "http://localhost:8080", "http://localhost:3000")
-                       .AllowAnyMethod()
-                       .AllowAnyHeader()
-                       .AllowCredentials());
+app.UseCors("corsapp");
 
 app.UseHttpsRedirection();
 
