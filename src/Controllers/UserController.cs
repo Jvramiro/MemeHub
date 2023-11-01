@@ -53,7 +53,7 @@ namespace MemeHub.Controllers
         public async Task<IActionResult> Create([FromBody] UserRequest request) {
 
             if (!ModelState.IsValid){
-                return BadRequest(request);
+                return BadRequest();
             }
 
             if (request.Role == Role.Adm) {
