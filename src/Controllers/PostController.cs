@@ -24,7 +24,9 @@ namespace MemeHub.Controllers {
             if (rows > 30) {
                 return BadRequest("The number of rows cannot exceed 30");
             }
-            var posts = await dbContext.Posts.AsNoTracking().Skip((page - 1) * rows).ToListAsync();
+            var posts = await dbContext.Posts.AsNoTracking()
+                                                .OrderByDescending(p => p.CreatedOn).Skip((page - 1) * rows)
+                                                .ToListAsync();
 
             if (posts == null || posts.Count == 0) {
                 return NotFound("No posts found");

@@ -26,7 +26,9 @@ namespace MemeHub.Controllers {
                 return BadRequest("The number of rows cannot exceed 50");
             }
 
-            var comments = await dbContext.Comments.AsNoTracking().Skip((page - 1) * rows).ToListAsync();
+            var comments = await dbContext.Comments.AsNoTracking().Skip((page - 1) * rows)
+                                                    .OrderByDescending(c => c.CreatedOn)
+                                                    .ToListAsync();
 
             if (comments == null || comments.Count == 0) {
                 return NotFound("No Comments found");
