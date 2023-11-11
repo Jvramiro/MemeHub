@@ -32,7 +32,8 @@ namespace MemeHub.Controllers {
             var token = TokenService.GenerateToken(user.Email, user.Id, user.Role, configuration);
 
             var response = new {
-                Token = token
+                Token = token,
+                ID = user.Id
             };
 
             return Ok(response);
