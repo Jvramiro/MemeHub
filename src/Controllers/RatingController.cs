@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace MemeHub.Controllers {
@@ -46,6 +47,23 @@ namespace MemeHub.Controllers {
             }
 
             return Ok(rating.Value);
+
+        }
+
+        [HttpGet("user/{Id}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetByUser([FromRoute] Guid Id, int page = 1, int rows = 10, int limit = 200) {
+
+            var getRating = await dbContext.Rating.AsNoTracking().Where(r => r.Owner == Id)
+                                /*.OrderByDescending(p => p.CreatedOn)*/.Take(limit).ToListAsync();
+
+            var rating = getRating.Skip((page - 1) * rows);
+
+            if (rating == null || rating.Count() == 0) {
+                return NotFound("No Rating found");
+            }
+
+            return Ok(rating);
 
         }
 

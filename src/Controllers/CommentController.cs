@@ -50,6 +50,22 @@ namespace MemeHub.Controllers {
             return Ok(comment.Text);
         }
 
+        [HttpGet("user/{Id}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetByUser([FromRoute] Guid Id, int page = 1, int rows = 10, int limit = 200) {
+
+            var getComments = await dbContext.Comments.AsNoTracking().Where(c => c.CreatedBy == Id)
+                                .OrderByDescending(c => c.CreatedOn).Take(limit).ToListAsync();
+
+            var comments = getComments.Skip((page - 1) * rows);
+
+            if (comments == null || comments.Count() == 0) {
+                return NotFound("No Comments found");
+            }
+
+            return Ok(comments);
+        }
+
         [HttpPost]
         [Authorize(Roles = "User, Adm")]
         public async Task<IActionResult> Create([FromBody] CommentRequest request) {

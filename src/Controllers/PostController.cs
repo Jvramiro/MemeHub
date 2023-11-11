@@ -102,6 +102,41 @@ namespace MemeHub.Controllers {
             return Ok(response);
         }
 
+        [HttpGet("user/{Id}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetByUser([FromRoute] Guid Id, int page = 1, int rows = 10, int limit = 200) {
+
+            if (limit > 200) {
+                return BadRequest("The limit of post to check cannot exceed 200");
+            }
+            if (rows > 30) {
+                return BadRequest("The number of rows cannot exceed 30");
+            }
+
+            var getPosts = await dbContext.Posts.AsNoTracking().Where(p => p.CreatedBy == Id)
+                            .OrderByDescending(p => p.CreatedOn).Take(limit).ToListAsync();
+
+            var posts = getPosts.Skip((page - 1) * rows);
+
+            if (posts == null) {
+                return NotFound("No posts found");
+            }
+
+            var response = new List<PostResponse>();
+
+            foreach (var post in posts) {
+                int ratingTrue = await dbContext.Rating.Where(r => r.PostId == post.Id && r.Value && r.IsActive).CountAsync();
+                int ratingFalse = await dbContext.Rating.Where(r => r.PostId == post.Id && !r.Value && r.IsActive).CountAsync();
+                int commentCount = await dbContext.Comments.CountAsync(c => c.PostId == post.Id);
+
+                response.Add(new PostResponse(post.Id, post.Title, post.ImageUrl, post.OwnerUsername, ratingTrue, ratingFalse,
+                                                commentCount, post.Owner, post.CreatedOn));
+            }
+
+            return Ok(response);
+
+        }
+
         [HttpPost]
         [Authorize(Roles = "User, Adm")]
         public async Task<IActionResult> Create([FromBody] PostRequest request) {
