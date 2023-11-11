@@ -26,8 +26,6 @@ namespace MemeHub.Data {
             modelBuilder.Entity<User>()
                 .Property(p => p.Password).HasMaxLength(50).IsRequired();
             modelBuilder.Entity<User>()
-                .HasIndex(e => e.Password).IsUnique();
-            modelBuilder.Entity<User>()
                 .Property(p => p.Role).IsRequired();
 
             modelBuilder.Entity<Post>()

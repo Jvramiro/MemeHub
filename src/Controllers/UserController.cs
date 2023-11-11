@@ -4,6 +4,7 @@ using MemeHub.Extensions;
 using MemeHub.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
 namespace MemeHub.Controllers
@@ -39,6 +40,27 @@ namespace MemeHub.Controllers
         public async Task<IActionResult> GetById([FromRoute] Guid Id) {
 
             var user = await dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == Id);
+
+            if (user == null) {
+                return NotFound("User not found");
+            }
+
+            var response = new UserResponse(user.Id, user.Username, user.Email, user.Role);
+            return Ok(response);
+        }
+
+        [HttpGet("current")]
+        [Authorize(Roles = "User, Adm")]
+        public async Task<IActionResult> GetCurrentUser() {
+
+            var userId = HttpContext.User.FindFirst("Id").Value;
+            Guid UserGuid = Guid.Empty;
+
+            if (userId == null || !Guid.TryParse(userId, out UserGuid)) {
+                return BadRequest("There's no valid Id on Token");
+            }
+
+            var user = await dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == UserGuid);
 
             if (user == null) {
                 return NotFound("User not found");
