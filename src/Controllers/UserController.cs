@@ -2,6 +2,7 @@
 using MemeHub.DTO;
 using MemeHub.Extensions;
 using MemeHub.Models;
+using MemeHub.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -76,6 +77,10 @@ namespace MemeHub.Controllers
 
             if (!ModelState.IsValid){
                 return BadRequest();
+            }
+
+            if (!PasswordService.CheckStrength(request.Password)) {
+                return BadRequest("Weak password");
             }
 
             if (request.Role == Role.Adm) {
