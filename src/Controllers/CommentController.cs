@@ -74,6 +74,11 @@ namespace MemeHub.Controllers {
                 return BadRequest();
             }
 
+            var post = await dbContext.Posts.AsNoTracking().FirstOrDefaultAsync(p => p.Id == request.PostId);
+            if (post == null) {
+                return NotFound("Post not found");
+            }
+
             Guid userId;
             if(!Guid.TryParse(HttpContext.User.FindFirst("Id").Value, out userId)){
                 return BadRequest("There's no valid Id on Token");
