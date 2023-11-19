@@ -115,6 +115,11 @@ namespace MemeHub.Controllers {
 
             comment.Text = Text;
 
+            Guid updatedBy = Guid.Empty;
+            if (Guid.TryParse(userId, out updatedBy)) {
+                comment.UpdatedBy = updatedBy;
+            }
+
             dbContext.Comments.Update(comment);
             await dbContext.SaveChangesAsync();
 

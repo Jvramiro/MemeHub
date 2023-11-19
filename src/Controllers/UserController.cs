@@ -32,7 +32,7 @@ namespace MemeHub.Controllers
                 return NotFound("No users found");
             }
 
-            var response = users.Select(u => new UserResponse(u.Id, u.Username, u.Email, u.Role));
+            var response = users.Select(u => new UserResponse(u.Id, u.Username, u.Email, u.Birthday, u.Role));
             return Ok(response);
         }
 
@@ -46,7 +46,7 @@ namespace MemeHub.Controllers
                 return NotFound("User not found");
             }
 
-            var response = new UserResponse(user.Id, user.Username, user.Email, user.Role);
+            var response = new UserResponse(user.Id, user.Username, user.Email, user.Birthday, user.Role);
             return Ok(response);
         }
 
@@ -67,7 +67,7 @@ namespace MemeHub.Controllers
                 return NotFound("User not found");
             }
 
-            var response = new UserResponse(user.Id, user.Username, user.Email, user.Role);
+            var response = new UserResponse(user.Id, user.Username, user.Email, user.Birthday, user.Role);
             return Ok(response);
         }
 
@@ -101,7 +101,7 @@ namespace MemeHub.Controllers
             await dbContext.Users.AddAsync(user);
             await dbContext.SaveChangesAsync();
 
-            var response = new UserResponse(user.Id, user.Username, user.Email, user.Role);
+            var response = new UserResponse(user.Id, user.Username, user.Email, user.Birthday, user.Role);
             return Created($"User {user.Username} successfully created", user.Id);
         }
 
@@ -131,13 +131,18 @@ namespace MemeHub.Controllers
             user.Email = request.Email ?? user.Email;
             user.Password = request.Password != null ? request.Password.HashPassword() : user.Username;
             user.Role = request.Role ?? user.Role;
-            //user.UpdatedBy = 
+            user.Birthday = request.Birthday ?? user.Birthday;
             user.UpdatedOn = DateTime.UtcNow;
+
+            Guid updatedBy = Guid.Empty;
+            if (Guid.TryParse(userId, out updatedBy)) {
+                user.UpdatedBy = updatedBy;
+            }
 
             dbContext.Users.Update(user);
             await dbContext.SaveChangesAsync();
 
-            var response = new UserResponse(user.Id, user.Username, user.Email, user.Role);
+            var response = new UserResponse(user.Id, user.Username, user.Email, user.Birthday, user.Role);
             return Ok(response);
         }
 
