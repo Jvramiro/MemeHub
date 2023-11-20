@@ -137,7 +137,7 @@ namespace MemeHub.Controllers {
 
         }
 
-        [HttpGet("current/rating")]
+        [HttpGet("rating/current")]
         [AllowAnonymous]
         public async Task<IActionResult> GetByRating([FromRoute] Guid Id, int page = 1, int rows = 10, int limit = 500) {
 
