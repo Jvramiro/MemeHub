@@ -137,49 +137,6 @@ namespace MemeHub.Controllers {
 
         }
 
-        [HttpGet("rating/current")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetByRating([FromRoute] Guid Id, int page = 1, int rows = 10, int limit = 500) {
-
-            if (limit > 500) {
-                return BadRequest("The limit of posts to check cannot exceed 200");
-            }
-            if (rows > 30) {
-                return BadRequest("The number of rows cannot exceed 30");
-            }
-
-            var posts = await dbContext.Posts
-                .Join(dbContext.Rating,
-                    post => post.Id,
-                    rating => rating.PostId,
-                    (post, rating) => new { Post = post, Rating = rating })
-
-                .Where(joined => joined.Rating.Owner == Id && joined.Rating.Value && joined.Rating.IsActive)
-                .OrderByDescending(joined => joined.Post.CreatedOn)
-                .Skip((page - 1) * rows)
-                .Take(limit)
-                .ToListAsync();
-
-            if (posts == null) {
-                return NotFound("No posts found");
-            }
-
-            var response = posts.Select(joined =>
-            {
-                int ratingTrue = dbContext.Rating
-                    .Count(r => r.PostId == joined.Post.Id && r.Value && r.IsActive);
-                int ratingFalse = dbContext.Rating
-                    .Count(r => r.PostId == joined.Post.Id && !r.Value && r.IsActive);
-                int commentCount = dbContext.Comments
-                    .Count(c => c.PostId == joined.Post.Id);
-
-                return new PostResponse(joined.Post.Id, joined.Post.Title, joined.Post.ImageUrl, joined.Post.OwnerUsername,
-                    ratingTrue, ratingFalse, commentCount, joined.Post.Owner, joined.Post.CreatedOn);
-            }).ToList();
-
-            return Ok(response);
-        }
-
         [HttpPost]
         [Authorize(Roles = "User, Adm")]
         public async Task<IActionResult> Create([FromBody] PostRequest request) {
