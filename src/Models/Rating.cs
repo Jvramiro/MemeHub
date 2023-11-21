@@ -10,6 +10,7 @@
             this.Owner = Owner;
             this.PostId = PostId;
             this.Value = Value;
+            this.IsActive = true;
         }
     }
 }
