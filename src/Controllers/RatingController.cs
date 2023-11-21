@@ -53,26 +53,15 @@ namespace MemeHub.Controllers {
         [HttpGet("user/{Id}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetByUser([FromRoute] Guid Id, int page = 1, int rows = 10, int limit = 200) {
-
-            var rating = await dbContext.Rating.AsNoTracking().Where(r => r.Owner == Id)
+            var getRating = await dbContext.Rating.AsNoTracking().Where(r => r.Owner == Id)
                                 /*.OrderByDescending(p => p.CreatedOn)*/.Take(limit).ToListAsync();
+            var rating = getRating.Skip((page - 1) * rows);
 
             if (rating == null || rating.Count() == 0) {
                 return NotFound("No Rating found");
             }
 
-            var postIds = rating.Select(r => r.PostId).ToList();
-
-            var postUrls = await dbContext.Posts
-                                    .AsNoTracking()
-                                    .Where(p => postIds.Contains(p.Id))
-                                    .ToDictionaryAsync(p => p.Id, p => p.ImageUrl);
-
-            var result = rating.Select(r => new { Rating = r, URL = postUrls.GetValueOrDefault(r.PostId) })
-                                    .ToList();
-
-            return Ok(result);
-
+            return Ok(rating);
         }
 
         [HttpPost]

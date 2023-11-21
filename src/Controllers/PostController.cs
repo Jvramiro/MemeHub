@@ -137,6 +137,34 @@ namespace MemeHub.Controllers {
 
         }
 
+        [HttpGet("current/likes")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetByUserRating([FromRoute] Guid Id, int page = 1, int rows = 10, int limit = 200) {
+
+            if (limit > 200) {
+                return BadRequest("The limit of post to check cannot exceed 200");
+            }
+            if (rows > 30) {
+                return BadRequest("The number of rows cannot exceed 30");
+            }
+
+            var userId = HttpContext.User.FindFirst("Id").Value;
+            Guid UserGuid = Guid.Empty;
+
+            if (userId == null || !Guid.TryParse(userId, out UserGuid)) {
+                return BadRequest("There's no valid Id on Token");
+            }
+
+            var ratingPosts = await dbContext.Rating.AsNoTracking().Where(r => r.Owner == UserGuid && r.Value)
+                                                .Skip((page - 1) * rows).Take(limit).Select(r => r.PostId).ToListAsync();
+
+            var response = await dbContext.Posts.AsNoTracking()
+                            .Where(post => ratingPosts.Contains(post.Id))
+                            .ToListAsync();
+
+            return Ok(response);
+        }
+
         [HttpPost]
         [Authorize(Roles = "User, Adm")]
         public async Task<IActionResult> Create([FromBody] PostRequest request) {
