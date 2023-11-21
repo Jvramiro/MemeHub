@@ -129,7 +129,7 @@ namespace MemeHub.Controllers
 
             user.Username = request.Username ?? user.Username;
             user.Email = request.Email ?? user.Email;
-            user.Password = request.Password != null ? request.Password.HashPassword() : user.Username;
+            user.Password = request.Password != null ? request.Password.HashPassword() : user.Password;
             user.Role = request.Role ?? user.Role;
             user.Birthday = request.Birthday ?? user.Birthday;
             user.UpdatedOn = DateTime.UtcNow;
