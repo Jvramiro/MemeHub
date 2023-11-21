@@ -5,6 +5,7 @@ using MemeHub.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using System.Linq;
 
 namespace MemeHub.Controllers {
@@ -139,7 +140,7 @@ namespace MemeHub.Controllers {
 
         [HttpGet("current/likes")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetByUserRating([FromRoute] Guid Id, int page = 1, int rows = 10, int limit = 200) {
+        public async Task<IActionResult> GetByUserRating(int page = 1, int rows = 10, int limit = 200) {
 
             if (limit > 200) {
                 return BadRequest("The limit of post to check cannot exceed 200");
@@ -157,6 +158,10 @@ namespace MemeHub.Controllers {
 
             var ratingPosts = await dbContext.Rating.AsNoTracking().Where(r => r.Owner == UserGuid && r.Value)
                                                 .Skip((page - 1) * rows).Take(limit).Select(r => r.PostId).ToListAsync();
+
+            if (ratingPosts == null) {
+                return NotFound("No posts found");
+            }
 
             var response = await dbContext.Posts.AsNoTracking()
                             .Where(post => ratingPosts.Contains(post.Id))
